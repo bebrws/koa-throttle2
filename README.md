@@ -1,6 +1,7 @@
 # koa-throttle
 
 Using the Koa framework, throttle the body of a response by specifying the rate or delay and chunk size.
+Works with koa-static
 
 ## Install
 
@@ -11,19 +12,21 @@ $ npm install koa-throttle --save
 ## Usage
 
 ```js
-var koa = require('koa');
-var Throttler = require('koa-throttle');
+const koa = require('koa');
+const serve = require('koa-static');
 
-var app = koa();
+const throttle = require('koa-throttle2');
+let throttler = throttle({rate: 100, chunk: 2, debug: 1});
 
-app
-  .use(Throttler({rate: 100, chunk: 2, debug: 1}))
-  .use(function *test(next){
+const app = new koa();
+
+app.use(throttler);
+
+app.use(serve(__dirname + '/public'));
+app.use(function *test(next){
     this.body = 'This is a big test string that will be throttled';
   });
-
-
-app.listen(3000);
+app.listen(4000);
 ```
 
 ## Options
