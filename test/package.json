@@ -1,7 +1,7 @@
 {
-  "name": "koa-throttle-test",
+  "name": "koa-throttle2-test",
   "version": "0.1.0",
-  "description": "Testing Koa Throttle",
+  "description": "Testing Koa Throttle2",
   "main": "test.js",
   "author": "Bradley Barrows",
   "license": "MIT",
