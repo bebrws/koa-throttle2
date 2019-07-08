@@ -1,11 +1,11 @@
-# koa-throttle
+# koa-throttle2
 
 Using the Koa framework, throttle the body of a response by specifying the rate or delay and chunk size. This middleware will stream the response chunk by chunk (size specified) with a specified delay in between in order to simulate a poor internet connection or latency. Throttling static file streaming is now fixed in thanks to gitgrimbo. I have commited his pull request from the original repository mentioned below into this new repository.
 
 ## Install
 
 ```bash
-$ npm install koa-throttle --save
+$ npm install koa-throttle2 --save
 ```
 
 ## Usage
