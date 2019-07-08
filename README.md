@@ -46,3 +46,25 @@ curl http://localhost:3000/buffer
 curl http://localhost:3000/stream
 curl http://localhost:3000/test/package.json
 ```
+
+## Contributors and Attribution
+
+This package was originally hosted here:
+
+```https://github.com/bbarrows/koa-throttle```
+
+Due to circumstances I had to create a new GitHub account and move the repo over here to:
+
+```https://github.com/bradebarrows/koa-throttle2```
+
+Because of this I was not able to merge in a very helpful pull request by a user @gitgrimbo 
+I just manually commited his changes into this fork of my old repository.
+
+This is a link to his pull request if you are interested:
+```https://github.com/bbarrows/koa-throttle/pull/2```
+And his account page so I don't take credit for his fix:
+```https://github.com/gitgrimbo```
+
+I wanted to give him attribution for fixing a project I did not think would garner much use and therefore did not test an edge case which he fixed. He also did a little bit of code clean up which is nice.
+
+Thank you!
