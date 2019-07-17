@@ -1,7 +1,12 @@
-var Readable = require('stream').Readable;
-var Stream = require('stream');
-var delay = require('koa-delay');
-var co = require('co');
+const Stream = require('stream');
+
+async function mdelay(duration) {
+    await new Promise(function(resolve, reject){
+      setTimeout(function(){
+        resolve();
+      }, duration)
+    });  
+}
 
 module.exports = function(options) {
   options || (options = {});
@@ -9,87 +14,67 @@ module.exports = function(options) {
   if (options.rate === undefined || !options.chunk === undefined) {
     throw new Error('missed rate and chunk option for Throttle');
   } else if (!options.rate || !options.chunk) {
-    return function* throttler(next) {
-      yield* next;
+    return async function throttler(next) {
+      await next;
     };
   }
 
-  return function* throttler(next) {
-    yield* next;
+  return async function throttler(ctx, next) {
+    await next();
+    
+    async function throttleString(str) {
+      let start = 0;
+      let part = 0;
+      do {
+        part = str.slice(start, start + options.chunk);
+        ctx.response.socket.write(part);
 
-    var originalBody = this.body;
-    var destination = null;
-
-    function newReadable() {
-      // Create a new readable stream which I will write the existing
-      // body to. Throttling the response at the specified rate
-      var r = new Readable();
-      r._read = function() { };
-      return r;
-    }
-
-    function* throttleString(str) {
-      co(function* () {
-        var start = 0;
-        do {
-          var part = str.slice(start, start + options.chunk);
-          destination.push(part);
-          // For debugging sending a new line will help as curl will show
-          // the data coming over line by line
-          if (options.debug) {
-            destination.push("\n");
-          }
-          start += options.chunk;
-          yield delay(options.rate);
-        } while (part.length);
-        destination.push(null);
-      });
-    }
-
-    function* throttleBuffer(buffer) {
-      var start = 0;
-      var len = buffer.length;
-      while (start < len) {
-        var part = buffer.slice(start, start + options.chunk);
-        destination.push(part);
-        start += options.chunk;
-        yield delay(options.rate);
-      }
-      destination.push(null);
-    }
-
-    function* throttleStream(stream) {
-      co(function* () {
-        var buf;
-        stream.on('data', function(c) {
-          buf = buf ? Buffer.concat([buf, c], buf.length + c.length) : c;
-        });
-        yield function(done) {
-          stream.on('end', done);
-        };
-        if (buf) {
-          yield throttleBuffer(buf);
+        // For debugging sending a new line will help as curl will show
+        // the data coming over line by line
+        if (options.debug) {
+          ctx.response.socket.write("\n");
         }
-        destination.push(null);
-      });
+        start += options.chunk;
+        await mdelay(options.rate);
+      } while (part.length);
+      ctx.response.socket.end();
     }
 
-    if (originalBody instanceof Stream) {
-      // Only set body if required
-      this.body = destination = newReadable();
-      yield throttleStream(originalBody);
-    } else if (Buffer.isBuffer(originalBody)) {
-      // Only set body if required
-      this.body = destination = newReadable();
-      co(function* () {
-        yield throttleBuffer(originalBody);
+    async function throttleBuffer(buffer) {
+      let start = 0;
+      let len = buffer.length;
+      while (start < len) {
+        let part = buffer.slice(start, start + options.chunk);
+        ctx.response.socket.write(part);
+        start += options.chunk;
+        await mdelay(options.rate);
+      }
+      ctx.response.socket.end();
+    }
+
+    async function throttleStream(stream) {
+      let buf;
+      stream.on('data', function(c) {
+        buf = buf ? Buffer.concat([buf, c], buf.length + c.length) : c;
       });
-    } else if ('string' == typeof originalBody) {
-      // Only set body if required
-      this.body = destination = newReadable();
-      yield throttleString(originalBody);
+
+      await new Promise(function(resolve, reject){
+        stream.on('end', function() {
+          resolve();
+        });
+      });
+
+      await throttleBuffer(buf);
+    }
+
+    if (ctx.body instanceof Stream) {
+      await throttleStream(ctx.body);
+    } else if (Buffer.isBuffer(ctx.body)) {
+      await throttleBuffer(ctx.body);
+    } else if ('string' == typeof ctx.body) {
+      await throttleString(ctx.body);
     } else {
-      // This should never happen as Koa's this.body should be either a string,
+      // This should never happen as Koa's ctx.body should be either a string,
       // Buffer, or Stream
       // https://github.com/koajs/koa/blob/master/lib/application.js#L218
       return;

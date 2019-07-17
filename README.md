@@ -1,5 +1,13 @@
 # koa-throttle
 
+For Koa 3 use the next branch:
+
+```
+npm install koa-throttle@next --save
+```
+
+For Koa 2:
+
 Using the Koa framework, throttle the body of a response by specifying the rate or delay and chunk size.
 Works with koa-static
 
