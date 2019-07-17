@@ -1,3 +1,4 @@
+var PassThrough = require('stream').PassThrough;
 const Stream = require('stream');
 
 async function mdelay(duration) {
@@ -21,35 +22,49 @@ module.exports = function(options) {
 
   return async function throttler(ctx, next) {
     await next();
+
+    function setupPiping() {
+      var r = new PassThrough();
+      r._read = function() { };
+      r.pipe(ctx.res);
+      ctx.body = r;    
+      return r;
+    }    
     
     async function throttleString(str) {
       let start = 0;
       let part = 0;
+
+      let r = setupPiping();
+      
       do {
         part = str.slice(start, start + options.chunk);
-        ctx.response.socket.write(part);
+        r.push(part);
 
         // For debugging sending a new line will help as curl will show
         // the data coming over line by line
         if (options.debug) {
-          ctx.response.socket.write("\n");
+          r.push('\n');
         }
         start += options.chunk;
         await mdelay(options.rate);
       } while (part.length);
-      ctx.response.socket.end();
+      r.push(null);
     }
 
     async function throttleBuffer(buffer) {
       let start = 0;
       let len = buffer.length;
+
+      let r = setupPiping();
+
       while (start < len) {
         let part = buffer.slice(start, start + options.chunk);
-        ctx.response.socket.write(part);
+        r.push(part);
         start += options.chunk;
         await mdelay(options.rate);
       }
-      ctx.response.socket.end();
+      r.push(null);
     }
 
     async function throttleStream(stream) {
