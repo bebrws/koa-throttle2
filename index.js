@@ -1,4 +1,4 @@
-var Readable = require('stream').Readable;
+var PassThrough = require('stream').PassThrough;
 var Stream = require('stream');
 var delay = require('koa-delay');
 var co = require('co');
@@ -15,20 +15,22 @@ module.exports = function(options) {
   }
 
   return function* throttler(next) {
+    var that = this;
+
     yield* next;
 
     var originalBody = this.body;
-    var destination = null;
 
-    function newReadable() {
-      // Create a new readable stream which I will write the existing
-      // body to. Throttling the response at the specified rate
-      var r = new Readable();
+    function setupPiping() {
+      var r = new PassThrough();
       r._read = function() { };
+      r.pipe(that.res);
+      that.body = r;    
       return r;
-    }
+    }   
 
     function* throttleString(str) {
+      var destination = setupPiping();
       co(function* () {
         var start = 0;
         do {
@@ -47,15 +49,18 @@ module.exports = function(options) {
     }
 
     function* throttleBuffer(buffer) {
-      var start = 0;
-      var len = buffer.length;
-      while (start < len) {
-        var part = buffer.slice(start, start + options.chunk);
-        destination.push(part);
-        start += options.chunk;
-        yield delay(options.rate);
-      }
-      destination.push(null);
+      co(function* () {
+        var destination = setupPiping();
+        var start = 0;
+        var len = buffer.length;
+        while (start < len) {
+          var part = buffer.slice(start, start + options.chunk);
+          destination.push(part);
+          start += options.chunk;
+          yield delay(options.rate);
+        }
+        destination.push(null);
+      });
     }
 
     function* throttleStream(stream) {
@@ -70,23 +75,14 @@ module.exports = function(options) {
         if (buf) {
           yield throttleBuffer(buf);
         }
-        destination.push(null);
       });
     }
 
     if (originalBody instanceof Stream) {
-      // Only set body if required
-      this.body = destination = newReadable();
       yield throttleStream(originalBody);
-    } else if (Buffer.isBuffer(originalBody)) {
-      // Only set body if required
-      this.body = destination = newReadable();
-      co(function* () {
-        yield throttleBuffer(originalBody);
-      });
+    } else if (Buffer.isBuffer(originalBody)) {      
+      yield throttleBuffer(originalBody);
     } else if ('string' == typeof originalBody) {
-      // Only set body if required
-      this.body = destination = newReadable();
       yield throttleString(originalBody);
     } else {
       // This should never happen as Koa's this.body should be either a string,
