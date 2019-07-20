@@ -1,4 +1,4 @@
-# koa-throttle
+# koa-throttle2
 
 ## Desc
 
@@ -12,13 +12,13 @@ Works with koa-static and should with any other middleware.
 For Koa 3 use the next branch:
 
 ```bash
-npm install koa-throttle@next --save
+npm install koa-throttle2@next --save
 ```
 
 For Koa 2:
 
 ```bash
-$ npm install koa-throttle --save
+$ npm install koa-throttle2 --save
 ```
 
 
