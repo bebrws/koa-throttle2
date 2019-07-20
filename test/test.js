@@ -35,7 +35,6 @@ test('koa static', async (assert) => {
     .get('/test.html')
     .expect(200)
     .end(function (err, res) {
-      console.log(res.text);
       assert.true(res.text.indexOf('</html>') !== -1);
       assert.end();
     });
