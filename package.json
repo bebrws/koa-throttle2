@@ -21,9 +21,11 @@
     "rate-limit"
   ],
   "dependencies": {
-    "co": "^4.6.0",
-    "koa-delay": "0.0.2"
+    "co": "^4.6.0"
   },
+  "scripts": {
+    "test": "pushd test; node test.js; popd"
+  },  
   "bugs": {
     "url": "https://github.com/bradebarrows/koa-throttle2/issues"
   },
