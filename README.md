@@ -1,21 +1,26 @@
 # koa-throttle
 
+## Desc
+
+Using the Koa framework, throttle the body of a response by specifying the rate or delay and chunk size. This middleware will stream the response chunk by chunk (size specified) with a specified delay in between in order to simulate a poor internet connection or latency.
+
+Works with koa-static and should with any other middleware.
+
+
+## Installation
+
 For Koa 3 use the next branch:
 
-```
+```bash
 npm install koa-throttle@next --save
 ```
 
 For Koa 2:
 
-Using the Koa framework, throttle the body of a response by specifying the rate or delay and chunk size.
-Works with koa-static
-
-## Install
-
 ```bash
 $ npm install koa-throttle --save
 ```
+
 
 ## Usage
 
