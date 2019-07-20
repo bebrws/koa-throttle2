@@ -18,7 +18,7 @@ npm install --save koa-throttle2
 For older versions of Koa using generators:
 
 ```bash
-$ npm install --save koa-throttle2@koa1
+$ npm install --save koa-throttle2@koa1v
 ```
 
 
