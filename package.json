@@ -1,6 +1,6 @@
 {
   "name": "koa-throttle2",
-  "version": "3.1.4",
+  "version": "3.1.5",
   "description": "Koa body response throttling by number of bytes per millisecond. Repo has change from git://github.com/bbarrows/koa-throttle.git to git://github.com/bradebarrows/koa-throttle2.git.",
   "main": "index.js",
   "author": "Bradley Barrows",
