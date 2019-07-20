@@ -12,13 +12,13 @@ Works with koa-static and should with any other middleware.
 For Koa 3 use the next branch:
 
 ```bash
-npm install koa-throttle2@next --save
+npm install --save koa-throttle2 
 ```
 
-For Koa 2:
+For older versions of Koa using generators:
 
 ```bash
-$ npm install koa-throttle2 --save
+$ npm install --save koa-throttle2@koa1
 ```
 
 
