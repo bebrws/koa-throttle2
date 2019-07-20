@@ -20,12 +20,10 @@
     "limit",
     "rate-limit"
   ],
-  "dependencies": {
-    "co": "^4.6.0"
-  },
+  "dependencies": {},
   "scripts": {
     "test": "pushd test; node test.js; popd"
-  },  
+  },
   "bugs": {
     "url": "https://github.com/bradebarrows/koa-throttle2/issues"
   },
