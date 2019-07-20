@@ -51,11 +51,7 @@ app.listen(4000);
 ## Testing
 
 Run:
-```cd test; npm install; node test.js```
-Then to see the data throttled flow in:
-```
-curl http://localhost:3000/string
-curl http://localhost:3000/buffer
-curl http://localhost:3000/stream
-curl http://localhost:3000/test/package.json
-```
+```npm test```
+
+When testing your own server try using curl with the -v option:
+```curl -v localhost:4000```

@@ -26,8 +26,14 @@ module.exports = function(options) {
     function setupPiping() {
       var r = new PassThrough();
       r._read = function() { };
-      r.pipe(ctx.res);
+      
+      // Not sure why but piping the stream as well as overwriting 
+      // ctx.body seamed to fix an issue where the response headers 
+      // were not being sent.
+      // It looks like in the latest version of koa this is unneccessary?
+      //r.pipe(ctx.res);
       ctx.body = r;    
+
       return r;
     }    
     
