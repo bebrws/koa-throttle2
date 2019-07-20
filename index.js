@@ -1,7 +1,6 @@
-var PassThrough = require('stream').PassThrough;
-var Stream = require('stream');
-var delay = require('koa-delay');
-var co = require('co');
+const PassThrough = require('stream').PassThrough;
+const Stream = require('stream');
+const co = require('co');
 
 module.exports = function(options) {
   options || (options = {});
@@ -15,14 +14,14 @@ module.exports = function(options) {
   }
 
   return function* throttler(next) {
-    var that = this;
+    let that = this;
 
     yield* next;
 
-    var originalBody = this.body;
+    let originalBody = this.body;
 
     function setupPiping() {
-      var r = new PassThrough();
+      let r = new PassThrough();
       r._read = function() { };
       r.pipe(that.res);
       that.body = r;    
@@ -30,11 +29,12 @@ module.exports = function(options) {
     }   
 
     function* throttleString(str) {
-      var destination = setupPiping();
+      let destination = setupPiping();
       co(function* () {
-        var start = 0;
+        let start = 0;
+        let part = "";
         do {
-          var part = str.slice(start, start + options.chunk);
+          part = str.slice(start, start + options.chunk);
           destination.push(part);
           // For debugging sending a new line will help as curl will show
           // the data coming over line by line
@@ -50,11 +50,11 @@ module.exports = function(options) {
 
     function* throttleBuffer(buffer) {
       co(function* () {
-        var destination = setupPiping();
-        var start = 0;
-        var len = buffer.length;
+        let destination = setupPiping();
+        let start = 0;
+        let len = buffer.length;
         while (start < len) {
-          var part = buffer.slice(start, start + options.chunk);
+          let part = buffer.slice(start, start + options.chunk);
           destination.push(part);
           start += options.chunk;
           yield delay(options.rate);
@@ -65,7 +65,7 @@ module.exports = function(options) {
 
     function* throttleStream(stream) {
       co(function* () {
-        var buf;
+        let buf;
         stream.on('data', function(c) {
           buf = buf ? Buffer.concat([buf, c], buf.length + c.length) : c;
         });

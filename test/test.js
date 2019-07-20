@@ -1,27 +1,42 @@
-var Readable = require('stream').Readable;
-var koa = require('koa');
-var route = require('koa-route');
-var serve = require('koa-static');
-var Throttler = require('../index');
+const test = require('tape');
+const request = require('supertest');
+const koa = require('koa');
+const serve = require('koa-static');
+const throttle = require('../index');
+//const throttle = require('koa-throttle2');
 
-var app = koa();
+const app = new koa();
 
-app
-  .use(Throttler({rate: 100, chunk: 2, debug: 1}))
-  .use(route.get('/string', function *list() {
-    this.body = 'This is a big test string that will be throttled';
-  }))
-  .use(route.get('/buffer', function *list() {
-    this.body = new Buffer('This is a big test string that will be throttled');
-  }))
-  .use(route.get('/stream', function *list() {
-    var r = new Readable();
-    r._read = function(){ };
-    r.push("Start ");
-    this.body = r;
-    r.push(" BEFORE ");
-    r.push(null);
-  }))
-  .use(route.get(/\/test\//, serve('.')));
+let throttler = throttle({rate: 100, chunk: 2, debug: 1});
 
-app.listen(3000);
+//app.use(throttler);
+
+app.use(serve(__dirname + '/public'));
+app.use(function *(next) {
+  this.body = 'This is a big test string that will be throttled';
+});
+
+// app.listen(4000);
+
+test('root / route', async (assert) => {
+  const response = request(app.callback())
+    .get('/')
+    .expect(200)
+    .end(function (err, res) {
+      console.log(res.text);
+      assert.true(res.text === 'This is a big test string that will be throttled');
+      assert.end();
+    });
+});
+
+
+test('koa static', async (assert) => {
+  const response = request(app.callback())
+    .get('/test.html')
+    .expect(200)
+    .end(function (err, res) {
+      console.log(res.text);
+      assert.true(res.text.indexOf('</html>') !== -1);
+      assert.end();
+    });
+})
