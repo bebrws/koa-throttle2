@@ -1,6 +1,6 @@
 # koa-throttle2
 
-## Desc
+## Description
 
 Using the Koa framework, throttle the body of a response by specifying the rate or delay and chunk size. This middleware will stream the response chunk by chunk (size specified) with a specified delay in between in order to simulate a poor internet connection or latency.
 
