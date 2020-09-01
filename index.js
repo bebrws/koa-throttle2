@@ -1,4 +1,4 @@
-var PassThrough = require('stream').PassThrough;
+const Readable = require('stream').Readable
 const Stream = require('stream');
 
 async function mdelay(duration) {
@@ -24,14 +24,13 @@ module.exports = function(options) {
     await next();
 
     function setupPiping() {
-      var r = new PassThrough();
+      var r = new Readable();
       r._read = function() { };
       
       // Not sure why but piping the stream as well as overwriting 
       // ctx.body seamed to fix an issue where the response headers 
       // were not being sent.
-      // It looks like in the latest version of koa this is unneccessary?
-      //r.pipe(ctx.res);
+      r.pipe(ctx.res);
       ctx.body = r;    
 
       return r;
@@ -67,6 +66,9 @@ module.exports = function(options) {
       while (start < len) {
         let part = buffer.slice(start, start + options.chunk);
         r.push(part);
+        if (options.debug) {
+          r.push('\n');
+        }
         start += options.chunk;
         await mdelay(options.rate);
       }
@@ -74,11 +76,11 @@ module.exports = function(options) {
     }
 
     async function throttleStream(stream) {
-      let buf;
+      let buf = Buffer.from([]);
       stream.on('data', function(c) {
-        buf = buf ? Buffer.concat([buf, c], buf.length + c.length) : c;
+        buf = Buffer.concat([buf, c], buf.length + c.length);
       });
-
+  
       await new Promise(function(resolve, reject){
         stream.on('end', function() {
           resolve();
